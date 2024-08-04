@@ -1,63 +1,89 @@
 import turtle
 import random
-import time
 
-global x
-global y
-global counter
+x_coordinates = [-200,-100,0,100,200]
+y_coordinates = [-200,-100,0,100,200]
+turtle_list = []
+score = 0
+game_over = False
+screen = turtle.Screen()
+screen.title("Catch the Turtle Game")
+screen.bgcolor("light blue")
 
-counter = 0
-def make_screen():
-    drawing_board = turtle.Screen()
-    drawing_board.bgcolor("lightblue")
+score_turtle = turtle.Turtle()
 
-def make_title():
-    game_title = turtle.Pen()
-    game_title.pencolor("green")
-    game_title.hideturtle()
-    game_title.penup()
-    game_title.setposition(-130,270)
-    game_title.write("Catch the Turtle Game", font=("Verdana",17))
+time_turtle = turtle.Turtle()
+def write_score():
 
+    score_turtle.hideturtle()
+    score_turtle.penup()
+    score_turtle.setpos(0, 290)
+    score_turtle.write("Score 0",False, "center", ("arial", 18, "bold"))
 
-# positioning the turtle at random places and one-second intervals
-def position_turtle(x,y):
+def write_time(time):
+    time_turtle.hideturtle()
+    time_turtle.penup()
+    time_turtle.setpos(0, 260)
+    time_turtle.write("Time {}".format(time),False, "center", ("arial", 18, "bold"))
 
-    my_turtle = turtle.Turtle()
-    my_turtle.color("green")
-    my_turtle.shape("turtle")
-    my_turtle.penup()
-    my_turtle.speed(0)
-    my_turtle.setposition(x,y)
-    time.sleep(1)
-    my_turtle.hideturtle()
-
-# if the click is on the turtle 1 will write at the terminal, is it is not then o will write
-
-def button_click(a,b):
-
-    if a>x-8 and a<x+8 and b>y-8 and b<y+8:
-        print(1)
-
+    if time>0:
+        time_turtle.clear()
+        time_turtle.write("Time {}".format(time), False, "center", ("arial", 18, "bold"))
+        screen.ontimer(lambda: write_time(time-1),1000)
     else:
-        print(0)
+        global game_over
+        game_over = True
+        score_turtle.clear()
+        time_turtle.clear()
+        hide_turtles()
+        time_turtle.setpos(0,15)
+        score_turtle.setpos(0,-15)
+        time_turtle.write("Game Over!", False, "center", ("arial", 25, "bold"))
+        score_turtle.write("Your score is {}".format(score), False, "center",("arial", 25, "bold"))
+def create_turtles():
 
-# making background, writing game title and positioning the turtle at the origin
+    for x in x_coordinates:
+        for y in y_coordinates:
 
-make_screen()
-make_title()
-position_turtle(0,0)
+            t = turtle.Turtle()
 
-# the turtle will be positioned ten times at random places
-while counter < 10:
+            def click_func(a,b):
+                global score
+                score += 1
+                score_turtle.clear()
+                score_turtle.write("Score {}".format(score), False, "center", ("arial", 18, "bold"))
 
-    x = random.randint(-200, 200)
-    y = random.randint(-200, 200)
+            t.onclick(click_func)
+            t.penup()
+            t.shapesize(1.5, 1.5)
+            t.color("green")
+            t.shape("turtle")
+            t.setposition(x,y)
+            t.pendown()
+            t.hideturtle()
+            turtle_list.append(t)
 
-    turtle.onscreenclick(button_click,1)
-    turtle.listen()
+def hide_turtles():
+    for i in turtle_list:
+        i.hideturtle()
 
-    position_turtle(x,y)
-    counter += 1
+
+def show_random_turtle():
+    global game_over
+
+    if game_over == False:
+        hide_turtles()
+        random.choice(turtle_list).showturtle()
+        screen.ontimer(show_random_turtle,1000)
+
+turtle.tracer(0)
+
+write_score()
+write_time(15)
+
+create_turtles()
+show_random_turtle()
+
+turtle.tracer(1)
 
 turtle.mainloop()
